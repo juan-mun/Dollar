@@ -15,11 +15,17 @@
         "keep_warm": false,
         "apigateway_enabled": false,
         "manage_roles": false,
+        "environment_variables": {
+        "RDS_HOST": "${{ secrets.RDS_HOST }}",
+        "RDS_USER": "${{ secrets.RDS_USER }}",
+        "RDS_PASSWORD": "${{ secrets.RDS_PASSWORD }}",
+        "RDS_DB": "${{ secrets.RDS_DB }}"
+    },
         "role_name": "LabRole",
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(28 5 * * ? *)"
+                "expression": "cron(38 5 * * ? *)"
             },
             {
                 "function": "app.process_file",
