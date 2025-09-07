@@ -48,10 +48,6 @@ jobs:
           echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> $GITHUB_ENV
           echo "RDS_DB=${{ secrets.RDS_DB }}" >> $GITHUB_ENV
 
-      - name: Prepare Zappa settings
-        run: |
-          envsubst < zappa_settings.template.json > zappa_settings.json
-
       - name: Deploy with Zappa
         run: |
           source env/bin/activate
