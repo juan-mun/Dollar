@@ -17,6 +17,7 @@ packaging==25.0
 placebo==0.9.0
 pluggy==1.6.0
 Pygments==2.19.2
+PyMySQL==1.1.2
 pytest==8.4.2
 python-dateutil==2.9.0.post0
 python-slugify==8.0.4
