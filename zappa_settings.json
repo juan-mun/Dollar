@@ -26,7 +26,7 @@
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(41 5 * * ? *)"
+                "expression": "cron(10 9 * * ? *)"
             },
             {
                 "function": "app.process_file",
