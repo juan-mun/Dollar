@@ -20,7 +20,14 @@
             {
                 "function": "app.f",
                 "expression": "cron(45 1 * * ? *)"
+            },
+            {
+                "function": "app.process_file",
+                "event_source": {
+                    "arn": "arn:aws:s3:::dolar-raw-cmjm",
+                    "events": ["s3:ObjectCreated:*"]
+                }
             }
-        ]    
+        ]
     }
 }
