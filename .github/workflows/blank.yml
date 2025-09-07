@@ -48,11 +48,20 @@ jobs:
           echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> $GITHUB_ENV
           echo "RDS_DB=${{ secrets.RDS_DB }}" >> $GITHUB_ENV
 
-      - name: Deploy with Zappa
+      - name: Deploy fetch with Zappa
         run: |
           source env/bin/activate
-          if zappa status dev; then
-            zappa update dev
+          if zappa status fetch; then
+            zappa update fetch
           else
-            zappa deploy dev
+            zappa deploy fetch
+          fi
+      
+      - name: Deploy process with Zappa
+        run: |
+          source env/bin/activate
+          if zappa status process; then
+            zappa update process
+          else
+            zappa deploy process
           fi
