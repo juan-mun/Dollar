@@ -20,6 +20,7 @@
         "RDS_USER": "${{ secrets.RDS_USER }}",
         "RDS_PASSWORD": "${{ secrets.RDS_PASSWORD }}",
         "RDS_DB": "${{ secrets.RDS_DB }}"
+        }
     },
         "role_name": "LabRole",
         "events": [
