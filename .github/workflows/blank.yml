@@ -41,19 +41,19 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
-     - name: Setup environment variables
-       run: |
-        echo "RDS_HOST=${{ secrets.RDS_HOST }}" >> $GITHUB_ENV
-        echo "RDS_USER=${{ secrets.RDS_USER }}" >> $GITHUB_ENV
-        echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> $GITHUB_ENV
-        echo "RDS_DB=${{ secrets.RDS_DB }}" >> $GITHUB_ENV
+      - name: Setup environment variables
+        run: |
+          echo "RDS_HOST=${{ secrets.RDS_HOST }}" >> $GITHUB_ENV
+          echo "RDS_USER=${{ secrets.RDS_USER }}" >> $GITHUB_ENV
+          echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> $GITHUB_ENV
+          echo "RDS_DB=${{ secrets.RDS_DB }}" >> $GITHUB_ENV
 
-     - name: Prepare Zappa settings
-       run: |
-        envsubst < zappa_settings.template.json > zappa_settings.json
-          
-     - name: Deploy with Zappa
-       run: |
+      - name: Prepare Zappa settings
+        run: |
+          envsubst < zappa_settings.template.json > zappa_settings.json
+
+      - name: Deploy with Zappa
+        run: |
           source env/bin/activate
           if zappa status dev; then
             zappa update dev
