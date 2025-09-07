@@ -25,7 +25,7 @@
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(30 21 * * ? *)"
+                "expression": "cron(45 21 * * ? *)"
             }
         ]
     },
