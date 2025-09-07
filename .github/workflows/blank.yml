@@ -1,52 +1,60 @@
-name: CI & Deploy to AWS Lambda with Zappa
+# This is a basic workflow to help you get started with Actions
 
+name: CI
+
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  deploy:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
+            python-version: '3.11'
       - name: Install dependencies
         run: |
-          python -m venv env
+            python -m venv env
+            source env/bin/activate
+            pip install -r requirements.txt
+      - name: Run tests
+        run: |
           source env/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install zappa
-
-      - name: Configure AWS credentials
+          pytest
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
-
       - name: Set up environment variables (Lambda)
-        run: |
-          echo "RDS_HOST=${{ secrets.RDS_HOST }}" >> .env
-          echo "RDS_USER=${{ secrets.RDS_USER }}" >> .env
-          echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
-          echo "RDS_DB=${{ secrets.RDS_DB }}" >> .env
+      run: |
+        echo "RDS_HOST=${{ secrets.RDS_HOST }}" >> .env
+        echo "RDS_USER=${{ secrets.RDS_USER }}" >> .env
+        echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+        echo "RDS_DB=${{ secrets.RDS_DB }}" >> .env
 
       - name: Deploy with Zappa
         run: |
-          source env/bin/activate
+         source env/bin/activate
           if zappa status dev; then
-            zappa update dev
+           zappa update dev
           else
             zappa deploy dev
           fi
