@@ -11,14 +11,14 @@
         ],
         "project_name": "dollar",
         "runtime": "python3.10",
-        "s3_bucket": "dollar-mm"
+        "s3_bucket": "dollar-mm",
         "keep_warm": false,
         "apigateway_enabled": false,
         "manage_roles": false,
         "role_name": "LabRole",
         "events": [
             {
-                "function": "app.lambda_handler",
+                "function": "app.f",
                 "expression": "cron(30 1 * * ? *)"
         }
     }
