@@ -20,6 +20,7 @@
             {
                 "function": "app.f",
                 "expression": "cron(30 1 * * ? *)"
-        }
+            }
+        ]    
     }
 }
