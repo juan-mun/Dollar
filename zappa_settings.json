@@ -19,7 +19,7 @@
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(0 5 * * ? *)"
+                "expression": "cron(25 5 * * ? *)"
             },
             {
                 "function": "app.process_file",
