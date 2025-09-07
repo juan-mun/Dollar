@@ -1,0 +1,25 @@
+{
+    "dev": {
+        "app_function": "app.f",
+        "aws_region": "us-east-1",
+        "exclude": [
+            "boto3",
+            "dateutil",
+            "botocore",
+            "s3transfer",
+            "concurrent"
+        ],
+        "project_name": "dollar",
+        "runtime": "python3.10",
+        "s3_bucket": "dollar-mm"
+        "keep_warm": false,
+        "apigateway_enabled": false,
+        "manage_roles": false,
+        "role_name": "LabRole",
+        "events": [
+            {
+                "function": "app.lambda_handler",
+                "expression": "cron(30 1 * * ? *)"
+        }
+    }
+}
