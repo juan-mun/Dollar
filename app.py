@@ -45,8 +45,10 @@ def f(event, context):
         data = fetch_dollar_data()
         filename = get_timestamp_filename()
         save_to_s3(data, filename)
+        print(f"Archivo guardado en S3: {filename}")
         return {"status": "success", "filename": filename}
     except Exception as e:
+        print(f"Error en función f: {e}")
         return {"status": "error", "message": str(e)}
 
 # ========= Función 2: Procesar archivo nuevo en S3 y guardar en RDS =========
@@ -82,18 +84,19 @@ def process_file(event, context):
         # DEBUG: mostrar estructura del archivo
         print("Contenido del archivo JSON:", data)
 
-        # VALIDACIÓN: debe ser una lista de listas
+        # Validar formato esperado: lista de listas
         if not isinstance(data, list) or not data or not isinstance(data[0], list):
-            return {"status": "error", "message": "El archivo JSON no tiene el formato esperado"}
+            msg = "El archivo JSON no tiene el formato esperado (lista de listas)"
+            print(msg)
+            return {"status": "error", "message": msg}
 
-        # Tomar el último registro
-        timestamp_ms, valor_str = data[-1]  # puedes usar data[0] si prefieres el primero
+        # Tomar el último registro (puedes cambiar a data[0] para el primero)
+        timestamp_ms, valor_str = data[-1]
 
-        # Convertir timestamp en milisegundos a datetime legible
+        # Convertir timestamp (milisegundos) a datetime legible
         fechahora = datetime.fromtimestamp(int(timestamp_ms) / 1000).strftime('%Y-%m-%d %H:%M:%S')
         valor = float(valor_str)
 
-        # DEBUG
         print(f"Insertando en base de datos: {fechahora} - {valor}")
 
         # Insertar en base de datos
@@ -103,12 +106,16 @@ def process_file(event, context):
             cursor.execute(sql, (fechahora, valor))
             connection.commit()
 
+        print("Insertado correctamente.")
         return {"status": "success", "message": f"Insertado: {fechahora} - {valor}"}
 
     except Exception as e:
-        print("ERROR:", str(e))
+        print(f"ERROR en process_file: {e}")
         return {"status": "error", "message": str(e)}
 
     finally:
         if connection:
-            connection.close()
+            try:
+                connection.close()
+            except Exception as close_err:
+                print(f"Error cerrando conexión: {close_err}")
