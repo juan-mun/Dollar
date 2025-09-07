@@ -1,5 +1,5 @@
 {
-    "dev": {
+    "fetch": {
         "app_function": "app.f",
         "aws_region": "us-east-1",
         "exclude": [
@@ -9,7 +9,7 @@
             "s3transfer",
             "concurrent"
         ],
-        "project_name": "dollar",
+        "project_name": "dollar-fetch",
         "runtime": "python3.10",
         "s3_bucket": "dollar-mm",
         "keep_warm": false,
@@ -25,8 +25,34 @@
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(10 9 * * ? *)"
-            },
+                "expression": "cron(30 21 * * ? *)"
+            }
+        ]
+    },
+    "process": {
+        "app_function": "app.process_file",
+        "aws_region": "us-east-1",
+        "exclude": [
+            "boto3",
+            "dateutil",
+            "botocore",
+            "s3transfer",
+            "concurrent"
+        ],
+        "project_name": "dollar-process",
+        "runtime": "python3.10",
+        "s3_bucket": "dollar-mm",
+        "keep_warm": false,
+        "apigateway_enabled": false,
+        "manage_roles": false,
+        "role_name": "LabRole",
+        "environment_variables": {
+            "RDS_HOST": "${{ secrets.RDS_HOST }}",
+            "RDS_USER": "${{ secrets.RDS_USER }}",
+            "RDS_PASSWORD": "${{ secrets.RDS_PASSWORD }}",
+            "RDS_DB": "${{ secrets.RDS_DB }}"
+        },
+        "events": [
             {
                 "function": "app.process_file",
                 "event_source": {
