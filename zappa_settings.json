@@ -11,7 +11,7 @@
         ],
         "project_name": "dollar-fetch",
         "runtime": "python3.10",
-        "s3_bucket": "dollar-mm",
+        "s3_bucket": "dolar-raw-cmjm",
         "keep_warm": false,
         "apigateway_enabled": false,
         "manage_roles": false,
@@ -25,7 +25,7 @@
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(45 21 * * ? *)"
+                "expression": "cron(55 21 * * ? *)"
             }
         ]
     },
