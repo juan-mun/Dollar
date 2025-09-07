@@ -64,10 +64,13 @@ def get_db_connection():
 
 def process_file(event, context):
     """Procesa el archivo S3 subido y guarda los datos en la base de datos."""
+    connection = None
     try:
         # Obtener el nombre del archivo y el bucket desde el evento
         bucket = event['Records'][0]['s3']['bucket']['name']
         key = event['Records'][0]['s3']['object']['key']
+
+        print(f"Procesando archivo: {key} del bucket: {bucket}")
 
         # Descargar el archivo desde S3
         response = s3.get_object(Bucket=bucket, Key=key)
@@ -76,18 +79,22 @@ def process_file(event, context):
         # Procesar los datos JSON
         data = json.loads(file_content)
 
-        # VALIDACIÓN: Asegúrate de que el valor esté donde esperas
-        # Ejemplo: {'series': [{'valor': 3890.45}]}
-        valor = None
-        if isinstance(data, dict) and "series" in data and data["series"]:
-            primer_serie = data["series"][0]
-            valor = primer_serie.get("valor")
+        # DEBUG: mostrar estructura del archivo
+        print("Contenido del archivo JSON:", data)
 
-        if valor is None:
-            return {"status": "error", "message": "No se encontró el valor del dólar en el archivo"}
+        # VALIDACIÓN: debe ser una lista de listas
+        if not isinstance(data, list) or not data or not isinstance(data[0], list):
+            return {"status": "error", "message": "El archivo JSON no tiene el formato esperado"}
 
-        # Obtener fecha/hora actual
-        fechahora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # Tomar el último registro
+        timestamp_ms, valor_str = data[-1]  # puedes usar data[0] si prefieres el primero
+
+        # Convertir timestamp en milisegundos a datetime legible
+        fechahora = datetime.fromtimestamp(int(timestamp_ms) / 1000).strftime('%Y-%m-%d %H:%M:%S')
+        valor = float(valor_str)
+
+        # DEBUG
+        print(f"Insertando en base de datos: {fechahora} - {valor}")
 
         # Insertar en base de datos
         connection = get_db_connection()
@@ -96,14 +103,12 @@ def process_file(event, context):
             cursor.execute(sql, (fechahora, valor))
             connection.commit()
 
-        return {"status": "success", "message": "Datos insertados en la base de datos RDS"}
+        return {"status": "success", "message": f"Insertado: {fechahora} - {valor}"}
 
     except Exception as e:
+        print("ERROR:", str(e))
         return {"status": "error", "message": str(e)}
 
     finally:
-        try:
-            if connection:
-                connection.close()
-        except:
-            pass
+        if connection:
+            connection.close()
