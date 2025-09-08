@@ -82,7 +82,9 @@ def process_file(event, context):
 
     try:
         print(">>> Iniciando Lambda process_file...")
-
+        
+        
+        print(">>> Validando Variables...")
         # 1. Validar variables de entorno si no hay conexión inyectada
         if db_conn is None:
             required_vars = ['RDS_HOST', 'RDS_USER', 'RDS_PASSWORD', 'RDS_DB']
@@ -95,7 +97,8 @@ def process_file(event, context):
         # 2. Extraer info del evento S3
         if 'Records' not in event or not event['Records']:
             raise ValueError("Evento S3 inválido: no se encontraron Records")
-
+        
+        print(">>> Leyendo Bucket...")
         record = event["Records"][0]
         bucket = record["s3"]["bucket"]["name"]
         key = record["s3"]["object"]["key"]
