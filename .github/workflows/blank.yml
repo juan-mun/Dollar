@@ -43,10 +43,10 @@ jobs:
 
       - name: Replace env vars in zappa_settings.json
         run: |
-          sed -i "s|\${DB_HOST}|${{ secrets.RDS_HOST }}|g" zappa_settings.json
-          sed -i "s|\${DB_USER}|${{ secrets.RDS_USER }}|g" zappa_settings.json
-          sed -i "s|\${DB_PASS}|${{ secrets.RDS_PASSWORD }}|g" zappa_settings.json
-          sed -i "s|\${DB_NAME}|${{ secrets.RDS_DB }}|g" zappa_settings.json
+          sed -i "s|\${RDS_HOST}|${{ secrets.RDS_HOST }}|g" zappa_settings.json
+          sed -i "s|\${RDS_USER}|${{ secrets.RDS_USER }}|g" zappa_settings.json
+          sed -i "s|\${RDS_PASSWORD}|${{ secrets.RDS_PASSWORD }}|g" zappa_settings.json
+          sed -i "s|\${RDS_DB}|${{ secrets.RDS_DB }}|g" zappa_settings.json
 
       - name: Deploy fetch with Zappa
         env:
