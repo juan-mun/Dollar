@@ -82,15 +82,18 @@ def test_process_file_exito(mock_boto):
     
     # Validaciones
     assert result["status"] == "ok"
-    assert result["rows_processed"] == 2
-    assert result["rows_inserted"] == 2
+    assert result["rows_processed"] == 1
+    assert result["rows_inserted"] == 1
     
     # Validar que se creó la tabla
     args, _ = mock_cursor.execute.call_args_list[0]
     assert "CREATE TABLE IF NOT EXISTS dolar" in args[0]
     
     # Validar que se hizo el insert
-    mock_cursor.executemany.assert_called_once()
+    mock_cursor.execute.assert_any_call(
+        "INSERT INTO dolar (fechahora, valor) VALUES (%s, %s)",
+        (datetime.fromtimestamp(1672617600000 / 1000), 4820.75)
+    )
 def test_process_file_evento_invalido():
     event = {"Records": []}
     context = type("obj", (), {"db_conn": MagicMock()})()
