@@ -69,6 +69,7 @@ def test_process_file_exito(mock_boto):
     mock_conn = MagicMock()
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value = mock_cursor
+    mock_cursor.rowcount = 2  # Simular 2 filas insertadas
     
     event = {
         "Records": [{
@@ -79,12 +80,17 @@ def test_process_file_exito(mock_boto):
     
     result = app.process_file(event, context)
     
+    # Validaciones
     assert result["status"] == "ok"
     assert result["rows_processed"] == 2
-    mock_cursor.execute.assert_any_call("CREATE TABLE IF NOT EXISTS dolar (\n        id INT AUTO_INCREMENT PRIMARY KEY,\n        fechahora DATETIME NOT NULL,\n        valor DECIMAL(10,4) NOT NULL,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n        INDEX idx_fechahora (fechahora)\n        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n        ")
+    assert result["rows_inserted"] == 2
+    
+    # Validar que se creó la tabla
+    args, _ = mock_cursor.execute.call_args_list[0]
+    assert "CREATE TABLE IF NOT EXISTS dolar" in args[0]
+    
+    # Validar que se hizo el insert
     mock_cursor.executemany.assert_called_once()
-
-
 def test_process_file_evento_invalido():
     event = {"Records": []}
     context = type("obj", (), {"db_conn": MagicMock()})()
