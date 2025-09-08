@@ -76,15 +76,13 @@ def f(event, context):
 
 def process_file(event, context):
     """
-    Lambda que carga datos de un archivo JSON en S3 a MySQL.
-    Basado en el ejemplo de referencia pero adaptado para nuestro caso.
+    Lambda que carga SOLO el último valor de un archivo JSON en S3 a MySQL (RDS).
     """
-    # Permitir inyección de conexión para tests (como en el ejemplo)
     db_conn = getattr(context, "db_conn", None)
-    
+
     try:
         print(">>> Iniciando Lambda process_file...")
-        
+
         # 1. Validar variables de entorno si no hay conexión inyectada
         if db_conn is None:
             required_vars = ['RDS_HOST', 'RDS_USER', 'RDS_PASSWORD', 'RDS_DB']
@@ -93,56 +91,42 @@ def process_file(event, context):
                 error_msg = f"Variables de entorno faltantes: {missing_vars}"
                 print(f">>> ERROR: {error_msg}")
                 return {"status": "error", "message": error_msg}
-        
+
         # 2. Extraer info del evento S3
         if 'Records' not in event or not event['Records']:
             raise ValueError("Evento S3 inválido: no se encontraron Records")
-            
+
         record = event["Records"][0]
         bucket = record["s3"]["bucket"]["name"]
         key = record["s3"]["object"]["key"]
-        
+
         print(f">>> Procesando archivo {key} desde bucket {bucket}")
-        
+
         # 3. Descargar archivo desde S3
         s3 = boto3.client("s3")
         obj = s3.get_object(Bucket=bucket, Key=key)
         body = obj["Body"].read()
         print(f">>> Archivo descargado, {len(body)} bytes")
-        
+
         # 4. Cargar JSON
         data = json.loads(body)
-        print(f">>> JSON cargado correctamente: {type(data)}")
-        
-        # Validar que sea una lista
+        print(f">>> JSON cargado correctamente: {type(data)} con {len(data)} registros")
+
+        # Validar que sea lista y no esté vacía
         if not isinstance(data, list) or not data:
             raise ValueError("El archivo JSON no contiene una lista de datos válida")
-        
-        # 5. Convertir datos (como en el ejemplo de referencia)
-        rows = []
-        for i, row in enumerate(data):
-            if not isinstance(row, list) or len(row) < 2:
-                continue  # Saltar filas inválidas
-                
-            timestamp_ms, valor = row[0], row[1]
-            
-            try:
-                fechahora = datetime.fromtimestamp(int(timestamp_ms) / 1000)
-                valor = float(valor)
-                rows.append((fechahora, valor))
-                
-                # Mostrar las primeras 5 filas para debug
-                if i < 5:
-                    print(f">>> Fila {i}: {row} → ({fechahora}, {valor})")
-            except (ValueError, TypeError) as e:
-                print(f">>> ERROR procesando fila {i}: {row} - {e}")
-                continue
-        
-        print(f">>> Total de filas preparadas: {len(rows)}")
-        
-        if not rows:
-            return {"status": "error", "message": "No se pudieron procesar datos válidos"}
-        
+
+        # 5. Tomar solo el último valor
+        ultimo = data[-1]
+        if not isinstance(ultimo, list) or len(ultimo) < 2:
+            raise ValueError(f"Formato inválido en el último registro: {ultimo}")
+
+        timestamp_ms, valor = ultimo[0], ultimo[1]
+        fechahora = datetime.fromtimestamp(int(timestamp_ms) / 1000)
+        valor = float(valor)
+
+        print(f">>> Último valor encontrado: {fechahora} → {valor}")
+
         # 6. Conectar a la DB si no hay conexión inyectada
         cerrar_conexion = False
         if db_conn is None:
@@ -154,14 +138,14 @@ def process_file(event, context):
                 password=rds_password,
                 database=rds_db,
                 charset='utf8mb4',
-                cursorclass=pymysql.cursors.Cursor,  # Usar Cursor normal como en el ejemplo
+                cursorclass=pymysql.cursors.Cursor,
                 connect_timeout=10,
                 read_timeout=10,
                 write_timeout=10
             )
             cerrar_conexion = True
             print(">>> Conexión establecida")
-        
+
         # 7. Crear tabla si no existe
         cursor = db_conn.cursor()
         create_table_sql = """
@@ -176,35 +160,26 @@ def process_file(event, context):
         cursor.execute(create_table_sql)
         db_conn.commit()
         print(">>> Tabla verificada/creada")
-        
-        # 8. Insertar en batch (como en el ejemplo de referencia)
-        insert_query = "INSERT IGNORE INTO dolar (fechahora, valor) VALUES (%s, %s)"
-        chunk_size = 500
-        total_inserted = 0
-        
-        for i in range(0, len(rows), chunk_size):
-            batch = rows[i:i + chunk_size]
-            cursor.executemany(insert_query, batch)
-            affected_rows = cursor.rowcount
-            total_inserted += affected_rows
-            print(f">>> Batch {i//chunk_size + 1}: {affected_rows} filas insertadas")
-        
+
+        # 8. Insertar solo un registro
+        insert_query = "INSERT INTO dolar (fechahora, valor) VALUES (%s, %s)"
+        cursor.execute(insert_query, (fechahora, valor))
         db_conn.commit()
+
         cursor.close()
-        
         if cerrar_conexion:
             db_conn.close()
             print(">>> Conexión cerrada")
-        
-        print(f">>> Inserción completada: {total_inserted} registros insertados de {len(rows)} procesados")
-        
+
+        print(">>> Inserción completada: 1 registro insertado")
+
         return {
-            "status": "ok", 
-            "rows_processed": len(rows),
-            "rows_inserted": total_inserted,
+            "status": "ok",
+            "rows_processed": 1,
+            "rows_inserted": 1,
             "file": key
         }
-    
+
     except Exception as e:
         print(f">>> ERROR en Lambda process_file: {e}")
         return {"status": "error", "message": str(e)}
