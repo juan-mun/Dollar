@@ -11,7 +11,7 @@
         ],
         "project_name": "dollar-fetch",
         "runtime": "python3.10",
-        "s3_bucket": "dolar-raw-cmjm",
+        "s3_bucket": "dolar-raw-cmjm-deploy",
         "keep_warm": false,
         "apigateway_enabled": false,
         "manage_roles": false,
@@ -19,7 +19,7 @@
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(10 17 * * ? *)"
+                "expression": "cron(20 17 * * ? *)"
             }
         ]
     },
@@ -35,7 +35,7 @@
         ],
         "project_name": "dollar-process",
         "runtime": "python3.10",
-        "s3_bucket": "dolar-raw-cmjm",
+        "s3_bucket": "dolar-raw-cmjm-deploy",
         "keep_warm": false,
         "apigateway_enabled": false,
         "manage_roles": false,
