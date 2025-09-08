@@ -16,16 +16,10 @@
         "apigateway_enabled": false,
         "manage_roles": false,
         "role_name": "LabRole",
-        "environment_variables": {
-            "RDS_HOST": "${RDS_HOST}",
-            "RDS_USER": "${RDS_USER}",
-            "RDS_PASSWORD": "${RDS_PASSWORD}",
-            "RDS_DB": "${RDS_DB}"
-        },
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(30 1 * * ? *)"
+                "expression": "cron(2 1 * * ? *)"
             }
         ]
     },
@@ -57,12 +51,19 @@
                 "function": "app.process_file",
                 "event_source": {
                     "arn": "arn:aws:s3:::dolar-raw-cmjm",
-                    "events": [
-                        "s3:ObjectCreated:Put",
-                        "s3:ObjectCreated:Post"
+                    "events": ["s3:ObjectCreated:*"],
+                    "filters": [
+                        {
+                            "name": "prefix",
+                            "value": "dolar-"
+                        },
+                        {
+                            "name": "suffix", 
+                            "value": ".json"
+                        }
                     ]
                 }
             }
         ]
     }
-}   
+}
