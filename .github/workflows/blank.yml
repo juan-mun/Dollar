@@ -42,7 +42,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Setup environment variables
-        env:
+        with:
           RDS_HOST: ${{ secrets.RDS_HOST }}
           RDS_USER: ${{ secrets.RDS_USER }}
           RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
