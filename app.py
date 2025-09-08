@@ -15,7 +15,7 @@ URL = "https://totoro.banrep.gov.co/estadisticas-economicas/rest/consultaDatosSe
 rds_host = os.environ.get('RDS_HOST')
 rds_user = os.environ.get('RDS_USER')
 rds_password = os.environ.get('RDS_PASSWORD')
-database=os.environ.get('RDS_DB')
+rds_db = os.environ.get('RDS_DB')
 
 # ========= Función 1: Obtener datos del dólar y guardarlos en S3 =========
 
@@ -152,7 +152,7 @@ def process_file(event, context):
                 port=3306,
                 user=rds_user,
                 password=rds_password,
-                database=database,
+                database=rds_db,
                 charset='utf8mb4',
                 cursorclass=pymysql.cursors.Cursor,  # Usar Cursor normal como en el ejemplo
                 connect_timeout=10,
