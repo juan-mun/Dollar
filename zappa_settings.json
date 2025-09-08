@@ -19,7 +19,7 @@
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(19 3 * * ? *)"
+                "expression": "cron(23 3 * * ? *)"
             }
         ]
     },
