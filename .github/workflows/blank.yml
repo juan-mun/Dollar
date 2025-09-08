@@ -42,6 +42,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Setup environment variables
+        uses: aws-actions
         with:
           RDS_HOST: ${{ secrets.RDS_HOST }}
           RDS_USER: ${{ secrets.RDS_USER }}
