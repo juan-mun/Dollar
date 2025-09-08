@@ -104,10 +104,13 @@ def process_file(event, context):
         key = record["s3"]["object"]["key"]
 
         print(f">>> Procesando archivo {key} desde bucket {bucket}")
-
+        
+        print(">>> Descargando...")
         # 3. Descargar archivo desde S3
         s3 = boto3.client("s3")
+        print(f">>> s3: {s3}...")
         obj = s3.get_object(Bucket=bucket, Key=key)
+        print(f">>> obj: {obj}...")
         body = obj["Body"].read()
         print(f">>> Archivo descargado, {len(body)} bytes")
 
