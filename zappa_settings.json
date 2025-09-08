@@ -19,7 +19,7 @@
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(16 5 * * ? *)"
+                "expression": "cron(52 3 * * ? *)"
             }
         ]
     },
@@ -35,7 +35,7 @@
         ],
         "project_name": "dollar-process",
         "runtime": "python3.10",
-        "s3_bucket": "dolar-raw-cmjm",
+        "s3_bucket": "dolar-raw-cmjm-deploy",
         "keep_warm": false,
         "apigateway_enabled": false,
         "manage_roles": false,
