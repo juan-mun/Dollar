@@ -55,6 +55,7 @@ def f(event, context):
 
 def get_db_connection():
     """Obtiene la conexión a la base de datos RDS."""
+    print(f"Intentando conectar a: {rds_host}")
     return pymysql.connect(
         host=rds_host,
         user=rds_user,
@@ -68,6 +69,14 @@ def process_file(event, context):
     """Procesa el archivo S3 subido y guarda los datos en la base de datos."""
     connection = None
     try:
+        # Validar variables de entorno
+        required_vars = ['RDS_HOST', 'RDS_USER', 'RDS_PASSWORD', 'RDS_DB']
+        missing_vars = [var for var in required_vars if not os.environ.get(var)]
+        if missing_vars:
+            error_msg = f"Variables de entorno faltantes: {missing_vars}"
+            print(error_msg)
+            return {"status": "error", "message": error_msg}
+        
         # Obtener el nombre del archivo y el bucket desde el evento
         bucket = event['Records'][0]['s3']['bucket']['name']
         key = event['Records'][0]['s3']['object']['key']
@@ -81,8 +90,10 @@ def process_file(event, context):
         # Procesar los datos JSON
         data = json.loads(file_content)
 
-        # DEBUG: mostrar estructura del archivo
-        print("Contenido del archivo JSON:", data)
+        # DEBUG: mostrar información del archivo
+        print(f"Tipo de datos: {type(data)}")
+        print(f"Número de registros: {len(data) if isinstance(data, list) else 'N/A'}")
+        print(f"Primeros 3 registros: {data[:3] if isinstance(data, list) and len(data) >= 3 else data}")
 
         # Validar formato esperado: lista de listas
         if not isinstance(data, list) or not data or not isinstance(data[0], list):
@@ -98,9 +109,12 @@ def process_file(event, context):
         valor = float(valor_str)
 
         print(f"Insertando en base de datos: {fechahora} - {valor}")
+        print(f"Variables de conexión - Host: {rds_host}, User: {rds_user}, DB: {rds_db}")
 
         # Insertar en base de datos
         connection = get_db_connection()
+        print("Conexión establecida exitosamente")
+        
         with connection.cursor() as cursor:
             sql = "INSERT INTO dolar (fechahora, valor) VALUES (%s, %s)"
             cursor.execute(sql, (fechahora, valor))
@@ -111,11 +125,13 @@ def process_file(event, context):
 
     except Exception as e:
         print(f"ERROR en process_file: {e}")
+        print(f"Tipo de error: {type(e)}")
         return {"status": "error", "message": str(e)}
 
     finally:
         if connection:
             try:
                 connection.close()
+                print("Conexión cerrada")
             except Exception as close_err:
                 print(f"Error cerrando conexión: {close_err}")
