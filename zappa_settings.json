@@ -25,7 +25,7 @@
         "events": [
             {
                 "function": "app.f",
-                "expression": "cron(2 1 * * ? *)"
+                "expression": "cron(19 1 * * ? *)"
             }
         ]
     },
@@ -41,7 +41,7 @@
         ],
         "project_name": "dollar-process",
         "runtime": "python3.10",
-        "s3_bucket": "dolar-raw-cmjm",
+        "s3_bucket": "dolar-raw-cmjm-deploy",
         "keep_warm": false,
         "apigateway_enabled": false,
         "manage_roles": false,
@@ -57,9 +57,12 @@
                 "function": "app.process_file",
                 "event_source": {
                     "arn": "arn:aws:s3:::dolar-raw-cmjm",
-                    "events": ["s3:ObjectCreated:*"]
+                    "events": [
+                        "s3:ObjectCreated:Put",
+                        "s3:ObjectCreated:Post"
+                    ]
                 }
             }
         ]
     }
-}
+}   
