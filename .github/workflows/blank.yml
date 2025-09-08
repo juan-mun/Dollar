@@ -41,15 +41,12 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
-      - name: Setup environment variables
-        uses: aws-actions
-        with:
+      - name: Deploy fetch with Zappa
+        env:
           RDS_HOST: ${{ secrets.RDS_HOST }}
           RDS_USER: ${{ secrets.RDS_USER }}
           RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
           RDS_DB: ${{ secrets.RDS_DB }}
-
-      - name: Deploy fetch with Zappa
         run: |
           source env/bin/activate
           if zappa status fetch; then
@@ -59,6 +56,11 @@ jobs:
           fi
       
       - name: Deploy process with Zappa
+        env:
+          RDS_HOST: ${{ secrets.RDS_HOST }}
+          RDS_USER: ${{ secrets.RDS_USER }}
+          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
+          RDS_DB: ${{ secrets.RDS_DB }}
         run: |
           source env/bin/activate
           if zappa status process; then
