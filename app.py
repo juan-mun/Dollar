@@ -107,7 +107,7 @@ def process_file(event, context):
         
         print(">>> Descargando...")
         # 3. Descargar archivo desde S3
-        s3 = boto3.client("s3")
+        s3 = boto3.client("s3", region_name="us-east-1")
         print(f">>> s3: {s3}...")
         obj = s3.get_object(Bucket=bucket, Key=key)
         print(f">>> obj: {obj}...")
